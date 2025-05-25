@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Priority Scheduling Simulator</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Priority Scheduling Simulator</h1>
+
+        <!-- Input Form -->
+        <div class="input-form">
+            <label for="arrival-mean">Mean Arrival Time:</label>
+            <input type="number" id="arrival-mean" placeholder="Enter mean arrival time" required>
+            <label for="service-mean">Mean Service Time:</label>
+            <input type="number" id="service-mean" placeholder="Enter mean service time" required>
+            <label for="num-servers">Number of Servers:</label>
+            <input type="number" id="num-servers" placeholder="Enter number of servers" required>
+            <button id="run-simulation">Run Simulation</button>
+        </div>
+
+        <!-- Results Table -->
+        <div class="results">
+            <table id="results-table" class="hidden">
+                <thead>
+                    <tr>
+                        <th>C.No</th>
+                        <th>Priority</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Service Time</th>
+                        <th>Wait Time</th>
+                        <th>Response Time</th>
+                        <th>Turnaround Time</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Averages -->
+        <div id="averages" class="hidden">
+            <h2>Averages</h2>
+            <div id="general-averages"></div>
+            <div id="priority-averages"></div>
+        </div>
+
+        <!-- Gantt Chart -->
+        <div class="gantt-chart">
+            <canvas id="gantt-chart" width="600" height="400"></canvas>
+        </div>
+
+        <!-- Server Utilization -->
+        <div id="server-utilization" class="hidden">
+            <h2>Server Utilization</h2>
+            <div id="utilization-info"></div>
+        </div>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-image: url(/background.jpg); 
+        background-size: cover; 
+        background-position: center; 
+        background-attachment: fixed; 
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 1000px;
+        width: 80%;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+    }
+
+    .container:hover {
+        transform: scale(1.02);
+    }
+
+    h1 {
+        text-align: center;
+        color: #444;
+        font-size: 30px;
+    }
+
+    .input-form {
+        margin-bottom: 20px;
+    }
+
+    .input-form label {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 5px;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .input-form input, .input-form select, .input-form button {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        color: #333;
+        transition: all 0.3s;
+    }
+
+    .input-form input:focus, .input-form select:focus {
+        outline: none;
+        border-color: #45a049;
+        box-shadow: 0 0 5px rgba(7, 209, 142, 0.6);
+    }
+
+    .input-form button {
+        background: linear-gradient(135deg, #45a049, #67ad6a);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background 0.3s, transform 0.2s;
+    }
+
+    .input-form button:hover {
+        background: linear-gradient(135deg, #45a049, #57b15b);
+        transform: translateY(-2px);
+    }
+
+    .input-form button:active {
+        transform: translateY(0);
+    }
+
+    .results table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        font-size: 14px;
+        opacity: 0;
+        animation: fadeInTable 0.5s forwards ease-in-out;
+    }
+
+    @keyframes fadeInTable {
+        to { opacity: 1; }
+    }
+
+    .results th, .results td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .results th {
+        background: linear-gradient(135deg, #76cf7b, #45a049);
+        color: white;
+        font-weight: bold;
+    }
+
+    .results tr:hover {
+        background: #f1f1f1;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .gantt-chart {
+        margin-top: 30px;
+    }
+
+    #server-utilization {
+        margin-top: 20px;
+    }
+
+    h2, h3 {
+        color: #444;
+        text-align: center;
+    }

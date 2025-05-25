@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Simulation</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        background-image: url(/background.jpg); 
+        background-size: cover; 
+        background-position: center; 
+        background-attachment: fixed; 
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient();
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .form-container:hover {
+            transform: scale(1.02);
+        }
+
+        header h1 {
+            margin: 0;
+            color: #444;
+            font-size: 30px;
+            text-align: center;
+        }
+
+        header p {
+            margin: 8px 0 20px;
+            font-size: 18px;
+            color: #666;
+            text-align: center;
+        }
+
+        .input-form label {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .input-form input, .input-form select, .input-form button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .input-form input:focus, .input-form select:focus {
+            outline: none;
+            border-color: #45a049;
+            box-shadow: 0 0 5px rgba(7, 209, 142, 0.6);
+        }
+
+        .input-form button {
+            background: linear-gradient(135deg, #45a049, #67ad6a);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .input-form button:hover {
+            background: linear-gradient(135deg, #45a049, #57b15b);
+            transform: translateY(-2px);
+        }
+
+        .input-form button:active {
+            transform: translateY(0);
+        }
+
+        #output {
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+            opacity: 0;
+            animation: fadeInTable 0.5s forwards ease-in-out;
+        }
+
+        @keyframes fadeInTable {
+            to { opacity: 1; }
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        table th {
+            background: linear-gradient(135deg, #76cf7b, #45a049);
+            color: white;
+            font-weight: bold;
+        }
+
+        table tr:hover {
+            background: #f1f1f1;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+
+        #averages {
+            margin-top: 20px;
+        }
+
+        h2, h3 {
+            color: #444;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <header>
+            <h1>General Simulation</h1>
+            <p>Enter the details below to run the simulation.</p>
+        </header>
+
+        <div class="input-form">
+            <label for="mean-arrival-time">Mean Arrival Time (minutes):</label>
+            <input type="number" id="mean-arrival-time" step="0.01" required>
+
+            <label for="mean-service-time">Mean Service Time (minutes):</label>
+            <input type="number" id="mean-service-time" step="0.01" required>
+
+            <label for="no-of-servers">Number of Servers:</label>
+            <select id="no-of-servers" required>
+                <option value="" disabled selected>Select servers</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+            </select>
+
+            <button id="submit-button">Run Simulation</button>
+        </div>
+
+        <div id="output">
+            <h2>Simulation Results</h2>
+            <div id="tableContainer"></div>
+            <canvas id="ganttChart" width="800" height="400"></canvas>
+            <div id="averages"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("submit-button").addEventListener("click", () => {
+            const meanArrival = parseFloat(document.getElementById("mean-arrival-time").value);
+            const meanService = parseFloat(document.getElementById("mean-service-time").value);
+            const numServers = parseInt(document.getElementById("no-of-servers").value);
+
+            if (isNaN(meanArrival) || isNaN(meanService) || isNaN(numServers)) {
+                alert("Please fill out all fields correctly.");
+                return;
+            }
+
+            const simulationData = runSimulation(meanArrival, meanService, numServers);
+
+            displayTable(simulationData);
+            displayGanttChart(simulationData);
+            displayAverages(simulationData);
+
+            document.getElementById("output").style.display = "block";
+        });
+
+        
+        function runSimulation(arrivalMean, serviceMean, numberOfServers) {
+            const numCustomers = 10; 
+            const customerIds = [];
+            const arrivalTimes = [];
+            const startTimes = [];
+            const endTimes = [];
+            const serviceTimes = [];
+            const waitTimes = [];
+            const turnaroundTimes = [];
+            const responseTimes = [];
+            const serverAssignments = [];
+
+            let currentTime = 0;
+            let serverUtilization = Array(numberOfServers).fill(0);
+
+            for (let i = 0; i < numCustomers; i++) {
+                const arrivalTime = currentTime + Math.random() * arrivalMean;
+                const serviceTime = Math.random() * serviceMean;
+                const server = i % numberOfServers;
+
+                const startTime = Math.max(arrivalTime, serverUtilization[server]);
+                const endTime = startTime + serviceTime;
+
+                customerIds.push(i + 1);
+                arrivalTimes.push(arrivalTime.toFixed(2));
+                startTimes.push(startTime.toFixed(2));
+                endTimes.push(endTime.toFixed(2));
+                serviceTimes.push(serviceTime.toFixed(2));
+                waitTimes.push((startTime - arrivalTime).toFixed(2));
+                turnaroundTimes.push((endTime - arrivalTime).toFixed(2));
+                responseTimes.push((startTime - arrivalTime).toFixed(2));
+                serverAssignments.push(server + 1);
+
+                serverUtilization[server] = endTime;
+                currentTime = arrivalTime;
+            }
+
+            return { 
+                customerIds, 
+                arrivalTimes, 
+                startTimes, 
+                endTimes, 
+                serviceTimes, 
+                waitTimes, 
+                turnaroundTimes, 
+                responseTimes, 
+                serverAssignments,
+                serverUtilization
+            };
+        }
+        
+        function displayTable(data) {
+            const tableContainer = document.getElementById('tableContainer');
+            tableContainer.innerHTML = `
+                <table>
+                    <tr>
+                        <th>Customer ID</th>
+                        <th>Arrival Time</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Service Time</th>
+                        <th>Wait Time</th>
+                        <th>Turnaround Time</th>
+                        <th>Response Time</th>
+                        <th>Server</th>
+                    </tr>
+                    ${data.customerIds.map((id, index) => `
+                        <tr>
+                            <td>${id}</td>
+                            <td>${data.arrivalTimes[index]}</td>
+                            <td>${data.startTimes[index]}</td>
+                            <td>${data.endTimes[index]}</td>
+                            <td>${data.serviceTimes[index]}</td>
+                            <td>${data.waitTimes[index]}</td>
+                            <td>${data.turnaroundTimes[index]}</td>
+                            <td>${data.responseTimes[index]}</td>
+                            <td>${data.serverAssignments[index]}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+        }
+        
+        function displayGanttChart(data) {
+    const ctx = document.getElementById('ganttChart').getContext('2d');
+    const colors = ['red', 'blue', 'green', 'orange', 'purple'];
+
+    const datasets = data.customerIds.map((id, index) => ({
+        label: `Customer ${id}`,
+        data: [
+            { x: parseFloat(data.startTimes[index]), y: data.serverAssignments[index] },
+            { x: parseFloat(data.endTimes[index]), y: data.serverAssignments[index] }
+        ],
+        borderColor: colors[index % colors.length],
+        backgroundColor: colors[index % colors.length] + '33', // Lightened for fill effect
+        borderWidth: 2,
+        pointBackgroundColor: colors[index % colors.length]
+    }));
+
+    new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+            responsive: true,
+            animation: {
+                duration: 1000, // Duration of the animation (in milliseconds)
+                easing: 'easeInOutQuad' // Smooth transition for better animation
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: { display: true, text: 'Time (minutes)' },
+                    ticks: {
+                        callback: function (value) {
+                            return value.toFixed(2); // Display time in fixed-point format
+                        },
+                        maxTicksLimit: 20 // Limit the number of ticks to avoid overcrowding
+                    },
+                    grid: {
+                        display: true, // Show gridlines
+                        color: '#ddd' // Light color for gridlines
+                    }
+                },
+                y: {
+                    title: { display: true, text: 'Server' },
+                    ticks: {
+                        stepSize: 1, // Space between each server label
+                        beginAtZero: true
+                    },
+                    grid: {
+                        display: true,
+                        color: '#ddd'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    enabled: true, // Show tooltips when hovering over data points
+                    callbacks: {
+                        label: function (tooltipItem) {
+                            return `Time: ${tooltipItem.raw.x.toFixed(2)} minutes - Server ${tooltipItem.raw.y}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+function displayAverages(data) {
+    const averagesDiv = document.getElementById('averages');
+    
+    // Calculate averages
+    const avgWait = (data.waitTimes.reduce((a, b) => a + parseFloat(b), 0) / data.waitTimes.length).toFixed(2);
+    const avgTurnaround = (data.turnaroundTimes.reduce((a, b) => a + parseFloat(b), 0) / data.turnaroundTimes.length).toFixed(2);
+    const avgResponse = (data.responseTimes.reduce((a, b) => a + parseFloat(b), 0) / data.responseTimes.length).toFixed(2);
+    const avgService = (data.serviceTimes.reduce((a, b) => a + parseFloat(b), 0) / data.serviceTimes.length).toFixed(2);
+
+    // Calculate individual server utilizations
+    const serverUtilizations = data.serverUtilization.map((utilization, index) => {
+        const serverTime = data.endTimes[data.endTimes.length - 1];
+        const individualUtilization = ((utilization / serverTime) * 100).toFixed(2);
+        return `Server ${index + 1} Utilization: ${individualUtilization}%`;
+    });
+    // Log or display the server utilizations
+    console.log(serverUtilizations);
+
+    averagesDiv.innerHTML = `
+        <h3>Averages</h3>
+        <ul>
+            <li>Average Wait Time: ${avgWait} minutes</li>
+            <li>Average Turnaround Time: ${avgTurnaround}minutes</li>
+            <li>Average Response Time: ${avgResponse}minutes</li>
+            <li>Average Service Time: ${avgService}minutes</li>
+        </ul>
+        <h3>Server Utilization</h3>
+        <ul>
+            ${serverUtilizations.map(utilization => `<li>${utilization}</li>`).join('')}
+        </ul>
+    `;
+
+
+    // Update the averagesDiv with the averages and server utilization details
+    averagesDiv.innerHTML = `
+        <h3>Averages</h3>
+        <p>Average Wait Time: ${avgWait} min</p>
+        <p>Average Turnaround Time: ${avgTurnaround} min</p>
+        <p>Average Response Time: ${avgResponse} min</p>
+        <p>Average Service Time: ${avgService} min</p>
+        ${serverUtilizations.join('<br>')}
+    `;
+
+    // Create line charts for each time metric
+    createLineChart('wait-time-chart', 'Wait Time', data.waitTimes);
+    createLineChart('turnaround-time-chart', 'Turnaround Time', data.turnaroundTimes);
+    createLineChart('response-time-chart', 'Response Time', data.responseTimes);
+    createLineChart('service-time-chart', 'Service Time', data.serviceTimes);
+}
+
+function createLineChart(chartId, label, data) {
+    // Create the canvas element dynamically
+    const chartDiv = document.getElementById('averages');
+    const canvas = document.createElement('canvas');
+    canvas.id = chartId;
+    chartDiv.appendChild(canvas);
+
+    // Create the chart
+    new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: data.map((_, index) => `Process ${index + 1}`), // Label processes
+            datasets: [{
+                label: label,
+                data: data,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    enabled: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return value.toFixed(2); }
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+
+    
+            </script>
+        </body>
+        </html>
+        
