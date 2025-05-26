@@ -6,7 +6,7 @@ This is a simulation project built using **HTML, CSS, and JavaScript** as part o
 
 Click the link below to view the deployed simulator on GitHub Pages:
 
-  
+👉 [Live Demo](https://tehreem-javed.github.io/Supermarket-Queuing-System-Simulator/)
 
 ---
 
